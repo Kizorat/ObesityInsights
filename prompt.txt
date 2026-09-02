@@ -1,0 +1,158 @@
+1) Ruolo e formato di output
+
+Sei un esperto Data Scientist specializzato nella generazione di dati sintetici (Synthetic Data Generation).
+Il tuo compito e' generare un dataset sintetico che riproduca fedelmente la struttura, le distribuzioni marginali e le relazioni tra le variabili del dataset reale descritto sotto, senza copiare alcuna riga reale.
+
+Consegna richiesta:
+- Attiva l'esecuzione di codice e produci un file CSV scaricabile, nominato dataset_sintetico.csv, contenente il dataset completo.
+- Il file deve avere ESATTAMENTE 1000 righe di dati, piu' la riga di header: 1001 righe in totale.
+- L'header deve essere identico, nome per nome e nell'ordine indicato, a quello del dataset reale.
+- Separatore virgola, punto come separatore decimale, nessun campo tra virgolette, nessun valore mancante, codifica UTF-8.
+- Nessuna riga deve coincidere esattamente con una delle righe reali riportate come esempio.
+- Se non riesci a rendere disponibile un file scaricabile, dillo subito in una riga e poi stampa comunque l'intero contenuto del CSV come testo, a partire dall'header, senza blocchi Markdown e senza troncare nulla.
+
+VINCOLO METODOLOGICO IMPORTANTE, da rispettare rigorosamente:
+I valori delle righe devono essere prodotti da te, non estratti da un generatore pseudo-casuale.
+Non scrivere codice Python che campioni i dati da distribuzioni statistiche (niente numpy.random, scipy.stats, random.gauss, faker o simili) e non ricavare le righe da formule di campionamento.
+Devi comporre tu ogni riga, decidendo i valori sulla base delle statistiche e dei vincoli descritti nei punti 3 e 4, esattamente come faresti se dovessi scriverle a mano una per una.
+Il codice ti e' consentito soltanto per due scopi: scrivere su file le righe che hai gia' composto, incollandole come lista di stringhe letterali, e verificare a posteriori che i vincoli siano rispettati.
+Se dopo la verifica qualche vincolo non torna, correggi tu i valori delle righe interessate e riscrivi il file, senza rigenerarle con un campionatore.
+
+Questo vincolo esiste perche' il dataset servira' a valutare la capacita' del modello linguistico di riprodurre autonomamente una struttura statistica: un campionamento programmatico renderebbe la valutazione priva di significato.
+
+Dopo aver prodotto il file, riporta in risposta soltanto il link di download e una tabella sintetica con i controlli elencati al punto 6. Nessun'altra spiegazione.
+
+
+2) Contesto e schema del dataset
+
+Il dataset reale di riferimento e' dataset/Obesity_onevsrest_5.csv: 2111 osservazioni, 17 colonne, nessun valore mancante.
+Riguarda abitudini alimentari, attivita' fisica e stile di vita di individui, con una variabile target binaria che identifica una singola classe di obesita' severa (codifica one-vs-rest).
+
+Header esatto, nell'ordine:
+Gender,Age,Height,Weight,family_history_with_overweight,FAVC,FCVC,NCP,CAEC,SMOKE,CH2O,SCC,FAF,TUE,CALC,MTRANS,target
+
+Colonne categoriche, con i soli valori ammessi:
+- Gender: 'Female', 'Male'
+- family_history_with_overweight: 'yes', 'no'   (storico familiare di sovrappeso)
+- FAVC: 'yes', 'no'                             (consumo frequente di cibi ipercalorici)
+- CAEC: 'no', 'Sometimes', 'Frequently', 'Always'  (cibo fuori dai pasti)
+- SMOKE: 'yes', 'no'
+- SCC: 'yes', 'no'                              (monitoraggio del consumo calorico)
+- CALC: 'no', 'Sometimes', 'Frequently', 'Always'  (consumo di alcool)
+- MTRANS: 'Automobile', 'Motorbike', 'Bike', 'Public_Transportation', 'Walking'
+- target: 0 oppure 1 (intero, senza decimali)
+
+Colonne numeriche continue. ATTENZIONE al formato dei valori: nel dataset reale queste variabili sono in larga parte NON intere e riportate con precisione piena, fino a sei cifre decimali (ad esempio Age=23.647935, Height=1.681394, Weight=114.479459, FCVC=2.619835, FAF=0.232742).
+Circa il 76% delle righe ha quattro o piu' colonne numeriche con valori decimali; un quarto circa delle righe ha invece quasi tutti valori tondi. Riproduci questo miscuglio: la maggioranza delle righe generate deve avere piu' colonne con decimali a precisione piena, una minoranza puo' avere valori tondi. Non arrotondare tutto a una o due cifre decimali.
+- Age: eta' in anni, intervallo 14.0 - 61.0
+- Height: altezza in metri, intervallo 1.45 - 1.98
+- Weight: peso in kg, intervallo 39.0 - 173.0
+- FCVC: frequenza consumo verdure, intervallo 1.0 - 3.0
+- NCP: numero pasti principali, intervallo 1.0 - 4.0
+- CH2O: consumo giornaliero d'acqua, intervallo 1.0 - 3.0
+- FAF: frequenza attivita' fisica, intervallo 0.0 - 3.0
+- TUE: tempo su dispositivi tecnologici, intervallo 0.0 - 2.0
+
+
+3) Distribuzioni marginali da riprodurre
+
+Variabili numeriche (media, deviazione standard, minimo, primo quartile, mediana, terzo quartile, massimo):
+Age     media 24.31  sd  6.35  min 14.00  Q1 19.95  mediana 22.78  Q3  26.00  max  61.00
+Height  media  1.70  sd  0.09  min  1.45  Q1  1.63  mediana  1.70  Q3   1.77  max   1.98
+Weight  media 86.59  sd 26.19  min 39.00  Q1 65.47  mediana 83.00  Q3 107.43  max 173.00
+FCVC    media  2.42  sd  0.53  min  1.00  Q1  2.00  mediana  2.39  Q3   3.00  max   3.00
+NCP     media  2.69  sd  0.78  min  1.00  Q1  2.66  mediana  3.00  Q3   3.00  max   4.00
+CH2O    media  2.01  sd  0.61  min  1.00  Q1  1.58  mediana  2.00  Q3   2.48  max   3.00
+FAF     media  1.01  sd  0.85  min  0.00  Q1  0.12  mediana  1.00  Q3   1.67  max   3.00
+TUE     media  0.66  sd  0.61  min  0.00  Q1  0.00  mediana  0.63  Q3   1.00  max   2.00
+
+Age e' fortemente asimmetrica a destra: la maggior parte delle osservazioni sta tra 18 e 26 anni, con una coda lunga fino a 61.
+
+Variabili categoriche (percentuali esatte da rispettare). Nota che diverse variabili sono FORTEMENTE SBILANCIATE: non appiattirle verso proporzioni piu' uniformi, vanno riprodotte cosi' come sono.
+Gender:  Female 49.4%  |  Male 50.6%
+family_history_with_overweight:  yes 81.8%  |  no 18.2%
+FAVC:  yes 88.4%  |  no 11.6%
+SMOKE:  no 97.9%  |  yes 2.1%
+SCC:  no 95.5%  |  yes 4.5%
+CAEC:  Sometimes 83.6%  |  Frequently 11.5%  |  Always 2.5%  |  no 2.4%
+CALC:  Sometimes 66.4%  |  no 30.3%  |  Frequently 3.3%  |  Always 0.05%
+MTRANS:  Public_Transportation 74.9%  |  Automobile 21.6%  |  Walking 2.7%  |  Motorbike 0.5%  |  Bike 0.3%
+target:  0 -> 85.9%  |  1 -> 14.1%   (circa 859 righe con target=0 e 141 con target=1 su 1000)
+
+
+4) Struttura di dipendenza da riprodurre
+
+Questa e' la parte piu' importante: le colonne non devono essere generate in modo indipendente l'una dall'altra. Vanno rispettati i seguenti vincoli congiunti, che nel dataset reale sono molto marcati.
+
+- Gender x target. E' la relazione piu' forte del dataset ed e' quasi deterministica:
+  fra le donne solo lo 0.2% ha target=1 (2 casi su 1043);
+  fra gli uomini il 27.6% ha target=1 (295 casi su 1068).
+  In pratica quasi tutti i positivi sono uomini. Su 1000 righe attenditi circa 1-2 donne con target=1 e il resto dei positivi maschi.
+
+- family_history_with_overweight x target:
+  chi ha 'no' ha target=1 nello 0.3% dei casi;
+  chi ha 'yes' ha target=1 nel 17.2% dei casi.
+
+- CAEC x target: Sometimes 16.6%, Always 3.8%, no 2.0%, Frequently 0.4% di target=1.
+
+- MTRANS x target: Automobile 20.8%, Bike 14.3%, Public_Transportation 12.7%, Walking 1.8%, Motorbike 0.0% di target=1.
+
+- Profilo medio per classe target:
+  target=0 -> eta' media 23.7, peso medio 81.9 kg, altezza media 1.690 m
+  target=1 -> eta' media 28.2, peso medio 115.3 kg, altezza media 1.772 m
+  Chi ha target=1 e' quindi piu' anziano, piu' alto e nettamente piu' pesante.
+
+- Correlazioni fra variabili numeriche da preservare:
+  Weight-Height 0.46, FAF-Height 0.29, Age-TUE -0.30, NCP-Height 0.24, Weight-FCVC 0.22, Weight-CH2O 0.20, Age-Weight 0.20, Age-FAF -0.14.
+
+- Coerenza fisiologica e vincolo BMI. Peso e altezza devono restare plausibili rispetto a eta' e genere. Detto BMI = Weight / Height^2, nel dataset reale TUTTE le 297 righe con target=1 hanno BMI compreso fra 34.05 e 39.79: e' una condizione necessaria, quindi ogni riga che generi con target=1 deve cadere in quella banda.
+  Non e' pero' una condizione sufficiente: anche 77 righe con target=0 cadono nella stessa banda, perche' target=0 raccoglie tutte le altre classi di peso, alcune delle quali si sovrappongono. Nella banda 34-40 circa il 79% delle righe ha target=1 e il restante 21% target=0; fuori da quella banda il target e' sempre 0. Riproduci anche questa quota di sovrapposizione, senza rendere il BMI un predittore perfetto del target.
+  Il BMI complessivo delle righe con target=0 spazia da 13 a 50.8.
+
+
+5) Esempi
+
+Tutte le righe che seguono sono righe reali estratte dal dataset, non inventate. Il contenuto del file prodotto deve avere esattamente questo aspetto.
+
+Header:
+Gender,Age,Height,Weight,family_history_with_overweight,FAVC,FCVC,NCP,CAEC,SMOKE,CH2O,SCC,FAF,TUE,CALC,MTRANS,target
+
+Righe con target=0, il caso maggioritario. Si noti la precisione piena dei valori numerici e il fatto che alcune colonne restano tonde mentre altre no:
+Female,23.647935,1.681394,114.479459,yes,yes,3,3,Sometimes,no,2.435978,no,0.232742,0.692608,Sometimes,Public_Transportation,0
+Male,18,1.783906,109.207614,yes,yes,2,1.867836,Sometimes,no,2.438398,no,1,0.802305,no,Public_Transportation,0
+Female,20.244359,1.559186,41.952805,no,yes,2.619835,1,Frequently,no,1.198883,no,0,0.751212,Sometimes,Public_Transportation,0
+Female,20.81158,1.741193,128.763843,yes,yes,3,3,Sometimes,no,1.768111,no,0.616503,0.968151,Sometimes,Public_Transportation,0
+Male,34.204611,1.719509,84.416515,yes,yes,2.031246,3,Sometimes,no,2.803002,no,1.98448,0.418623,no,Automobile,0
+
+Una minoranza di righe reali ha invece quasi tutti valori tondi, come queste (sono le prime cinque del file):
+Female,21.0,1.62,64.0,yes,no,2.0,3.0,Sometimes,no,2.0,no,0.0,1.0,no,Public_Transportation,0
+Female,21.0,1.52,56.0,yes,no,3.0,3.0,Sometimes,yes,3.0,yes,3.0,0.0,Sometimes,Public_Transportation,0
+Male,23.0,1.8,77.0,yes,no,2.0,3.0,Sometimes,no,2.0,no,2.0,1.0,Frequently,Public_Transportation,0
+Male,27.0,1.8,87.0,no,no,3.0,3.0,Sometimes,no,2.0,no,2.0,0.0,Frequently,Walking,0
+Male,22.0,1.78,89.8,no,no,2.0,1.0,Sometimes,no,2.0,no,0.0,0.0,Sometimes,Public_Transportation,0
+
+Righe con target=1, la classe minoritaria. Sono quasi tutte maschili, con eta' e peso sopra la media e BMI fra 34 e 40:
+Male,28.986237,1.758618,113.501549,yes,yes,2.320201,3,Sometimes,no,2.164784,no,0,1.465479,Sometimes,Automobile,1
+Male,37.207082,1.762921,118.40174,yes,yes,2.13683,2.993084,Sometimes,no,1.885926,no,0.615298,0,Sometimes,Automobile,1
+Male,24.982997,1.78968,118.436166,yes,yes,1.469384,2.996444,Sometimes,no,2.067741,no,1.082236,0.150544,Sometimes,Public_Transportation,1
+Male,30.722801,1.779325,120.751656,yes,yes,2.519592,3,Sometimes,no,2.229145,no,0.350717,1.140348,Sometimes,Automobile,1
+
+Le uniche due righe femminili con target=1 presenti nell'intero dataset reale, a conferma di quanto sia rara la combinazione Female + target=1:
+Female,25,1.63,93,no,no,3,4,Always,no,1,no,2,0,no,Public_Transportation,1
+Female,24,1.6,100.5,yes,yes,3,1,Sometimes,no,1,no,0,2,Sometimes,Public_Transportation,1
+
+
+6) Richiesta
+
+Componi ESATTAMENTE 1000 righe sintetiche nuove, con l'header indicato al punto 2, rispettando le distribuzioni marginali del punto 3 e i vincoli di dipendenza del punto 4, e salvale nel file scaricabile dataset_sintetico.csv.
+
+Dopo aver scritto il file, verificalo e riporta in una tabella i seguenti controlli:
+- numero di righe di dati, atteso 1000;
+- proporzione di target=1, attesa circa 14.1%, cioe' circa 141 righe;
+- numero di donne con target=1, atteso 1 o 2;
+- percentuali di FAVC, SMOKE, SCC, family_history_with_overweight e MTRANS, confrontate con quelle dichiarate al punto 3;
+- numero di righe con target=1 aventi BMI fuori dalla banda 34.05-39.79, atteso 0;
+- quota di righe con target=0 dentro quella banda, attesa circa il 21% delle righe in banda;
+- percentuale di righe con almeno quattro colonne numeriche a valori decimali, attesa circa il 76%.
+
+Se un controllo non rientra nelle attese, correggi manualmente le righe interessate, riscrivi il file e ripeti la verifica, senza ricorrere a un campionamento casuale.
